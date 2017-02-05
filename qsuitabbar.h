@@ -23,6 +23,10 @@
 
 #include <QTabBar>
 
+class QAction;
+class QActionGroup;
+class QMenu;
+
 /**
     @author Ilya Kotov <forkotov02@hotmail.ru>
 */
@@ -31,10 +35,21 @@ class QSUiTabBar : public QTabBar
     Q_OBJECT
 public:
     explicit QSUiTabBar(QWidget *parent = 0);
+    QMenu *menu() const;
+    void setTabText(int index, const QString &text);
+    void readSettings();
+
+private slots:
+    void updateActions();
+
+protected:
+    void tabInserted(int index) override;
+    void tabRemoved(int index) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
 
 private:
-    void mouseReleaseEvent(QMouseEvent *e);
-
+    QMenu *m_menu;
+    QActionGroup *m_group;
 };
 
 #endif // QSUITABBAR_H

@@ -70,14 +70,14 @@ ListWidget::ListWidget(PlayListModel *model, QWidget *parent)
     setMouseTracking(true);
 
     readSettings();
-    connect(m_ui_settings, SIGNAL(repeatableTrackChanged(bool)), SLOT(updateRepeatIndicator()));
-    connect(m_timer, SIGNAL(timeout()), SLOT(autoscroll()));
-    connect(m_scrollBar, SIGNAL(valueChanged (int)), SLOT(scroll(int)));
-    connect(m_hslider, SIGNAL(valueChanged(int)), m_header, SLOT(scroll(int)));
-    connect(m_hslider, SIGNAL(valueChanged(int)), this, SLOT(update()));
-    connect(m_model, SIGNAL(currentVisibleRequest()), SLOT(scrollToCurrent()));
-    connect(m_model, SIGNAL(listChanged(int)), SLOT(updateList(int)));
-    connect(m_model, SIGNAL(sortingByColumnFinished(int,bool)), m_header, SLOT(showSortIndicator(int,bool)));
+    connect(m_ui_settings, &QmmpUiSettings::repeatableTrackChanged, this, &ListWidget::updateRepeatIndicator);
+    connect(m_timer, &QTimer::timeout, this, &ListWidget::autoscroll);
+    connect(m_scrollBar,  &QScrollBar::valueChanged, this, &ListWidget::scroll);
+    connect(m_hslider, &QScrollBar::valueChanged, m_header, &PlayListHeader::scroll);
+    connect(m_hslider, &QScrollBar::valueChanged, this, QOverload<>::of(&ListWidget::update));
+    connect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
+    connect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
+    connect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);
     SET_ACTION(ActionManager::PL_SHOW_HEADER, this, SLOT(readSettings()));
 }
 
@@ -152,6 +152,20 @@ PlayListModel *ListWidget::model()
 {
     Q_ASSERT(m_model);
     return m_model;
+}
+
+void ListWidget::setModel(PlayListModel *newModel)
+{
+    disconnect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
+    disconnect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
+    disconnect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);
+
+    m_model = newModel;
+    connect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
+    connect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
+    connect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);
+
+    updateList(PlayListModel::STRUCTURE);
 }
 
 void ListWidget::paintEvent(QPaintEvent *)

@@ -33,7 +33,6 @@ SOURCES += \
     qsuifactory.cpp \
     qsuisettings.cpp \
     qsuitabbar.cpp \
-    qsuitabwidget.cpp \
     shortcutdialog.cpp \
     shortcutitem.cpp \
     toolbareditor.cpp \
@@ -66,7 +65,6 @@ HEADERS += \
     qsuifactory.h \
     qsuisettings.h \
     qsuitabbar.h \
-    qsuitabwidget.h \
     shortcutdialog.h \
     shortcutitem.h \
     toolbareditor.h \

@@ -65,6 +65,7 @@ public:
     QMenu *menu();
     void setMenu(QMenu *menu);
     PlayListModel *model();
+    void setModel(PlayListModel *newModel);
 
 public slots:
     void readSettings();

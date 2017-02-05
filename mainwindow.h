@@ -25,22 +25,21 @@
 #include <qmmpui/mediaplayer.h>
 #include "ui_mainwindow.h"
 
-class QSlider;
+class GeneralHandler;
+class KeyboardManager;
+class ListWidget;
+class MediaPlayer;
+class PlayListManager;
+class PlayListModel;
+class PositionSlider;
 class QLabel;
 class QMenu;
-class QToolButton;
-class UiHelper;
-class PlayListModel;
-class MediaPlayer;
-class SoundCore;
 class QmmpUiSettings;
-class PlayListManager;
-class GeneralHandler;
-class VisualMenu;
-class PositionSlider;
-class KeyboardManager;
+class QSlider;
 class QSUiAnalyzer;
-
+class SoundCore;
+class UiHelper;
+class VisualMenu;
 
 /**
     @author Ilya Kotov <forkotov02@hotmail.ru>
@@ -67,6 +66,8 @@ private slots:
     void addTab(int);
     void removeTab(int);
     void renameTab();
+    void renameTabAt(int);
+    void setTabsVisible(bool);
     void aboutUi();
     void about();
     void toggleVisibility();
@@ -95,6 +96,8 @@ private:
     void createButtons();
     void writeSettings();
     bool m_wasMaximized;
+    ListWidget *listWidget() const;
+    QString tabName(PlayListModel *model) const;
     QString m_lastDir;
     PlayListManager *m_pl_manager;
     Ui::MainWindow m_ui;
@@ -111,12 +114,13 @@ private:
     QSlider *m_volumeSlider;
     KeyboardManager *m_key_manager;
     QSUiAnalyzer *m_analyzer;
-    QToolButton *m_addListButton, *m_tabListMenuButton;
     MetaDataFormatter m_titleFormatter;
     int m_balance;
+    int m_tab_menu_index;
     bool m_update;
     bool m_hideOnClose;
-
+    bool m_show_new_pl_button;
+    bool m_show_tab_list_menu;
 };
 
 #endif
