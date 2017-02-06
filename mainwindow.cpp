@@ -49,7 +49,6 @@
 #include "hotkeyeditor.h"
 #include "filesystembrowser.h"
 #include "aboutqsuidialog.h"
-#include "keyboardmanager.h"
 #include "coverwidget.h"
 #include "playlistbrowser.h"
 #include "volumeslider.h"
@@ -82,15 +81,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(m_core, &SoundCore::bitrateChanged, this, &MainWindow::updateStatus);
     connect(m_core, &SoundCore::bufferingProgress, this, &MainWindow::showBuffering);
     connect(m_core, &SoundCore::metaDataChanged, this, &MainWindow::showMetaData);
-    //keyboard manager
-    m_key_manager = new KeyboardManager(this);
     //create tabs
-    ListWidget *list = new ListWidget(m_pl_manager->selectedPlayList(), this);
+    auto list = createListWidget(m_pl_manager->selectedPlayList());
     m_ui.centralwidget->layout()->addWidget(list);
     Q_ASSERT(list == listWidget());
     list->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     list->setMenu(m_pl_menu);
-    m_key_manager->setListWidget(list);
     foreach(PlayListModel *model, m_pl_manager->playLists())
     {
         m_ui.tabWidget->addTab(tabName(model));
@@ -109,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(m_pl_manager, &PlayListManager::playListsChanged, this, &MainWindow::updateTabs);
     connect(m_pl_manager, &PlayListManager::selectedPlayListChanged, this, [this](PlayListModel *current, PlayListModel *previous)
     {
-        ListWidget *list = listWidget();
+        auto list = listWidget();
         Q_ASSERT(list->model() == previous);
         list->setModel(current);
         m_ui.tabWidget->setCurrentIndex(m_pl_manager->selectedPlayListIndex());
@@ -170,9 +166,9 @@ MainWindow::~MainWindow()
 {
 }
 
-ListWidget* MainWindow::listWidget() const
+BaseListWidget* MainWindow::listWidget() const
 {
-    return qobject_cast<ListWidget*>(m_ui.centralwidget->layout()->itemAt(1)->widget());
+    return qobject_cast<BaseListWidget*>(m_ui.centralwidget->layout()->itemAt(1)->widget());
 }
 
 QString MainWindow::tabName(PlayListModel *model) const
@@ -698,7 +694,7 @@ void MainWindow::createActions()
 
     addActions(QList<QAction*>() << forward << backward);
     addActions(ActionManager::instance()->actions());
-    addActions(m_key_manager->actions());
+    addActions(listWidget()->actions());
 }
 
 void MainWindow::createButtons()
@@ -853,6 +849,11 @@ void MainWindow::writeSettings()
     settings.setValue("Simple/show_tabs", ACTION(ActionManager::UI_SHOW_TABS)->isChecked());
     settings.setValue("Simple/show_titlebars", ACTION(ActionManager::UI_SHOW_TITLEBARS)->isChecked());
     settings.setValue("Simple/block_toolbars", ACTION(ActionManager::UI_BLOCK_TOOLBARS)->isChecked());
+}
+
+BaseListWidget *MainWindow::createListWidget(PlayListModel *model)
+{
+    return new ListWidget(model, this);
 }
 
 void MainWindow::savePlayList()

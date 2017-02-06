@@ -11,6 +11,7 @@ TEMPLATE = lib
 SOURCES += \
     aboutqsuidialog.cpp \
     actionmanager.cpp \
+    baselistwidget.cpp \
     colorwidget.cpp \
     coverwidget.cpp \
     elidinglabel.cpp \
@@ -42,6 +43,7 @@ SOURCES += \
 HEADERS += \
     aboutqsuidialog.h \
     actionmanager.h \
+    baselistwidget.h \
     colorwidget.h \
     coverwidget.h \
     elidinglabel.h \

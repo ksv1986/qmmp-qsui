@@ -25,6 +25,7 @@
 #include <qmmpui/mediaplayer.h>
 #include "ui_mainwindow.h"
 
+class BaseListWidget;
 class GeneralHandler;
 class KeyboardManager;
 class ListWidget;
@@ -96,8 +97,9 @@ private:
     void createButtons();
     void writeSettings();
     bool m_wasMaximized;
-    ListWidget *listWidget() const;
+    BaseListWidget *listWidget() const;
     QString tabName(PlayListModel *model) const;
+    BaseListWidget *createListWidget(PlayListModel *model);
     QString m_lastDir;
     PlayListManager *m_pl_manager;
     Ui::MainWindow m_ui;
@@ -112,7 +114,6 @@ private:
     QMenu *m_pl_menu;
     QMenu *m_tab_menu;
     QSlider *m_volumeSlider;
-    KeyboardManager *m_key_manager;
     QSUiAnalyzer *m_analyzer;
     MetaDataFormatter m_titleFormatter;
     int m_balance;

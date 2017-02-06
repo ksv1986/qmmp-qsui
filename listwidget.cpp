@@ -35,6 +35,7 @@
 #include <qmmpui/qmmpuisettings.h>
 #include <qmmpui/mediaplayer.h>
 #include "listwidget.h"
+#include "keyboardmanager.h"
 #include "playlistheader.h"
 #include "actionmanager.h"
 #include "popupwidget.h"
@@ -42,13 +43,11 @@
 #define INVALID_INDEX -1
 
 ListWidget::ListWidget(PlayListModel *model, QWidget *parent)
-        : QWidget(parent)
+        : BaseListWidget(model, parent)
 {
     setFocusPolicy(Qt::StrongFocus);
     m_popupWidget = 0;
     m_ui_settings = QmmpUiSettings::instance();
-    m_menu = 0;
-    m_model = model;
     m_timer = new QTimer(this);
     m_timer->setInterval(50);
 
@@ -79,12 +78,20 @@ ListWidget::ListWidget(PlayListModel *model, QWidget *parent)
     connect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
     connect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);
     SET_ACTION(ActionManager::PL_SHOW_HEADER, this, SLOT(readSettings()));
+
+    //keyboard manager
+    m_key_manager = new KeyboardManager(this);
 }
 
 ListWidget::~ListWidget()
 {
     qDeleteAll(m_rows);
     m_rows.clear();
+}
+
+QList<QAction *> ListWidget::actions()
+{
+    return m_key_manager->actions();
 }
 
 void ListWidget::readSettings()
@@ -138,29 +145,14 @@ void ListWidget::setAnchorIndex(int index)
     updateList(PlayListModel::SELECTION);
 }
 
-QMenu *ListWidget::menu()
-{
-    return m_menu;
-}
-
-void ListWidget::setMenu(QMenu *menu)
-{
-    m_menu = menu;
-}
-
-PlayListModel *ListWidget::model()
-{
-    Q_ASSERT(m_model);
-    return m_model;
-}
-
 void ListWidget::setModel(PlayListModel *newModel)
 {
     disconnect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
     disconnect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
     disconnect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);
 
-    m_model = newModel;
+    BaseListWidget::setModel(newModel);
+
     connect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
     connect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
     connect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);

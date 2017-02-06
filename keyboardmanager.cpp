@@ -27,11 +27,10 @@
 #include "listwidget.h"
 #include "keyboardmanager.h"
 
-KeyboardManager::KeyboardManager(QObject *parent) :
-    QObject(parent)
+KeyboardManager::KeyboardManager(ListWidget *parent)
+    : QObject(parent)
+    , m_listWidget(parent)
 {
-    m_listWidget = 0;
-
     addAction(Qt::Key_Up, SLOT(processUp()));
     addAction(Qt::Key_Up + Qt::ShiftModifier, SLOT(processUp()));
     addAction(Qt::Key_Up + Qt::AltModifier, SLOT(processUp()));
@@ -211,11 +210,6 @@ void KeyboardManager::processDown()
     {
         m_listWidget->scroll (m_listWidget->firstVisibleIndex() + 1);
     }
-}
-
-void KeyboardManager::setListWidget(ListWidget *listWidget)
-{
-    m_listWidget = listWidget;
 }
 
 void KeyboardManager::processEnter()

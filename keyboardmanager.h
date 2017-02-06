@@ -34,10 +34,8 @@ class KeyboardManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit KeyboardManager(QObject *parent = 0);
-
+    explicit KeyboardManager(ListWidget *parent);
     QList<QAction*> actions();
-    void setListWidget(ListWidget *listWidget);
 
 private slots:
     void processUp();

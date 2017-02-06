@@ -24,8 +24,10 @@
 #include <QDir>
 #include <QContextMenuEvent>
 #include <QPen>
+#include "baselistwidget.h"
 #include "listwidgetdrawer.h"
 
+class KeyboardManager;
 class QFont;
 class QFontMetrics;
 class QMenu;
@@ -43,14 +45,16 @@ class PopupWidget;
 /**
    @author Ilya Kotov <forkotov02@hotmail.ru>
 */
-class ListWidget : public QWidget
+class ListWidget : public BaseListWidget
 {
     Q_OBJECT
 public:
     ListWidget(PlayListModel *model, QWidget *parent = 0);
-
     ~ListWidget();
+    QList<QAction*> actions() override;
 
+
+public:
     /*!
      * Returns count of currently visible rows.
      */
@@ -62,13 +66,10 @@ public:
 
     int anchorIndex() const;
     void setAnchorIndex(int index);
-    QMenu *menu();
-    void setMenu(QMenu *menu);
-    PlayListModel *model();
-    void setModel(PlayListModel *newModel);
+    void setModel(PlayListModel *newModel) override;
 
 public slots:
-    void readSettings();
+    void readSettings() override;
     void updateList(int flags);
     void scroll(int); //0-99
     void recenterCurrent();
@@ -115,8 +116,6 @@ private:
 
     bool m_update;
     int m_pressed_index;
-    QMenu *m_menu;
-    PlayListModel *m_model;
     int m_row_count, m_first;
     int m_anchor_index;
     /*!
@@ -135,6 +134,7 @@ private:
     ListWidgetDrawer m_drawer;
     PlayListHeader *m_header;
     QScrollBar *m_hslider;
+    KeyboardManager *m_key_manager;
 };
 
 #endif
