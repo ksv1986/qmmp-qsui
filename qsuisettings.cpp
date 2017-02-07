@@ -149,6 +149,7 @@ void QSUISettings::readSettings()
     QSettings settings (Qmmp::configFile(), QSettings::IniFormat);
     settings.beginGroup("Simple");
     //playlist
+    m_ui.columnsCheckBox->setChecked(settings.value("pl_view_columns", false).toBool());
     m_ui.protocolCheckBox->setChecked(settings.value("pl_show_protocol", false).toBool());
     m_ui.numbersCheckBox->setChecked(settings.value("pl_show_numbers", true).toBool());
     m_ui.lengthsCheckBox->setChecked(settings.value("pl_show_lengths", true).toBool());
@@ -194,6 +195,7 @@ void QSUISettings::writeSettings()
 {
     QSettings settings (Qmmp::configFile(), QSettings::IniFormat);
     settings.beginGroup("Simple");
+    settings.setValue("pl_view_columns",  m_ui.columnsCheckBox->isChecked());
     settings.setValue("pl_show_protocol", m_ui.protocolCheckBox->isChecked());
     settings.setValue("pl_show_numbers", m_ui.numbersCheckBox->isChecked());
     settings.setValue("pl_show_lengths", m_ui.lengthsCheckBox->isChecked());

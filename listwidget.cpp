@@ -43,7 +43,7 @@
 #define INVALID_INDEX -1
 
 ListWidget::ListWidget(PlayListModel *model, QWidget *parent)
-        : BaseListWidget(model, parent)
+        : QWidget(parent), BaseListWidget(model, parent)
 {
     setFocusPolicy(Qt::StrongFocus);
     m_popupWidget = 0;
@@ -124,6 +124,11 @@ void ListWidget::readSettings()
         m_popupWidget = new PlayListPopup::PopupWidget(this);
 }
 
+QWidget *ListWidget::widget()
+{
+    return this;
+}
+
 int ListWidget::visibleRows() const
 {
     return m_row_count;
@@ -145,13 +150,13 @@ void ListWidget::setAnchorIndex(int index)
     updateList(PlayListModel::SELECTION);
 }
 
-void ListWidget::setModel(PlayListModel *newModel)
+void ListWidget::setPlaylistModel(PlayListModel *newModel)
 {
     disconnect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
     disconnect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
     disconnect(m_model, &PlayListModel::sortingByColumnFinished, m_header, &PlayListHeader::showSortIndicator);
 
-    BaseListWidget::setModel(newModel);
+    BaseListWidget::setPlaylistModel(newModel);
 
     connect(m_model, &PlayListModel::currentVisibleRequest, this, &ListWidget::scrollToCurrent);
     connect(m_model, &PlayListModel::listChanged, this, &ListWidget::updateList);
@@ -197,12 +202,7 @@ void ListWidget::mouseDoubleClickEvent (QMouseEvent *e)
     int index = indexAt(y);
     if (INVALID_INDEX != index)
     {
-        m_model->setCurrent(index);
-        MediaPlayer *player = MediaPlayer::instance();
-        player->playListManager()->selectPlayList(m_model);
-        player->playListManager()->activatePlayList(m_model);
-        player->stop();
-        player->play();
+        playAt(index);
         emit selectionChanged();
         update();
     }

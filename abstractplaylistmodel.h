@@ -27,8 +27,8 @@
 class PlayListManager;
 class PlayListModel;
 class PlayListTrack;
-class SimpleSelection;
 class SoundCore;
+struct SimpleSelection;
 
 class AbstractPlaylistModel : public QAbstractListModel
 {

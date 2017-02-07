@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>483</height>
+    <width>465</width>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,6 +74,13 @@
           <string>Song Display</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="columnsCheckBox">
+            <property name="text">
+             <string>Columns playlist view</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QCheckBox" name="protocolCheckBox">
             <property name="text">
@@ -414,7 +421,16 @@
              <bool>false</bool>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
-             <property name="margin">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
               <number>0</number>
              </property>
              <item row="0" column="0">

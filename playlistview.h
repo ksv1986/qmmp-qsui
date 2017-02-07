@@ -1,6 +1,7 @@
 #ifndef MYTABLEVIEW_H
 #define MYTABLEVIEW_H
 
+#include "baselistwidget.h"
 #include <QTreeView>
 
 class QDragEnterEvent;
@@ -8,35 +9,34 @@ class QDragMoveEvent;
 class QDropEvent;
 class QMouseEvent;
 
-class PlaylistView : public QTreeView
+/* QObject must go first in inheritance list or it would confuse moc */
+class PlaylistView : private QTreeView, public BaseListWidget
 {
     Q_OBJECT
 public:
-    PlaylistView(QWidget *parent = 0);
-    virtual ~PlaylistView();
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dropEvent(QDropEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent *event);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
-    virtual void startDrag(Qt::DropActions supportedActions);
-    virtual void selectAll();
+    explicit PlaylistView(PlayListModel *model, QWidget *parent = 0);
+    ~PlaylistView();
 
+    QWidget *widget() Q_DECL_OVERRIDE;
+    void readSettings() Q_DECL_OVERRIDE;
+
+private:
+    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void startDrag(Qt::DropActions supportedActions) Q_DECL_OVERRIDE;
+    void selectAll() Q_DECL_OVERRIDE;
+
+private:
     void setup();
-
-private slots:
-    void toggleColumn(bool toggled);
-    void sectionClicked(int section);
-    void scrollToIndex(const QModelIndex& index);
-    void removeSelected();
 
 private:
     int m_anchor_row;
     int m_pressed_row;
     bool m_select_on_release;
     QPoint startPos;
-
-    QList<QAction*> m_columnActions; //! Maintains the mapping action<->column
 };
 
 #endif // MYTABLEVIEW_H

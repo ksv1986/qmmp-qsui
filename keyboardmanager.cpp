@@ -28,7 +28,7 @@
 #include "keyboardmanager.h"
 
 KeyboardManager::KeyboardManager(ListWidget *parent)
-    : QObject(parent)
+    : QObject(parent->widget())
     , m_listWidget(parent)
 {
     addAction(Qt::Key_Up, SLOT(processUp()));
@@ -64,18 +64,18 @@ void KeyboardManager::processUp()
 
     int keys = qobject_cast<QAction *>(sender())->shortcut()[0];
 
-    QList<int> rows = m_listWidget->model()->selectedIndexes();
+    QList<int> rows = m_listWidget->playlistModel()->selectedIndexes();
 
     if(rows.isEmpty())
     {
-        m_listWidget->model()->setSelected(m_listWidget->firstVisibleIndex(), true);
+        m_listWidget->playlistModel()->setSelected(m_listWidget->firstVisibleIndex(), true);
         m_listWidget->setAnchorIndex(m_listWidget->firstVisibleIndex());
         return;
     }
 
     if (!(keys & Qt::ShiftModifier || keys & Qt::AltModifier || keys & Qt::ControlModifier))
     {
-        m_listWidget->model()->clearSelection();
+        m_listWidget->playlistModel()->clearSelection();
         m_listWidget->setAnchorIndex(-1);
     }
 
@@ -93,7 +93,7 @@ void KeyboardManager::processUp()
     {
         if(rows.first() == 0)
             return;
-        m_listWidget->model()->moveItems (rows.first(), rows.first() - 1);
+        m_listWidget->playlistModel()->moveItems (rows.first(), rows.first() - 1);
         m_listWidget->setAnchorIndex (rows.first() - 1);
     }
     else if(keys & Qt::ControlModifier)
@@ -104,27 +104,27 @@ void KeyboardManager::processUp()
     {
         if(s == SELECT_TOP)
         {
-            m_listWidget->model()->setSelected (first_visible, true);
+            m_listWidget->playlistModel()->setSelected (first_visible, true);
             m_listWidget->setAnchorIndex(first_visible);
         }
         else if(s == SELECT_BOTTOM)
         {
-            m_listWidget->model()->setSelected (last_visible, true);
+            m_listWidget->playlistModel()->setSelected (last_visible, true);
             m_listWidget->setAnchorIndex(last_visible);
         }
         else if(rows.first() == 0)
         {
-            m_listWidget->model()->setSelected (rows.first(), true);
+            m_listWidget->playlistModel()->setSelected (rows.first(), true);
             m_listWidget->setAnchorIndex(rows.first());
         }
         else if(rows.contains(m_listWidget->anchorIndex()) || m_listWidget->anchorIndex() < 0)
         {
-            m_listWidget->model()->setSelected (rows.first() - 1, true);
+            m_listWidget->playlistModel()->setSelected (rows.first() - 1, true);
             m_listWidget->setAnchorIndex(rows.first() - 1);
         }
         else if(m_listWidget->anchorIndex() >= 0)
         {
-            m_listWidget->model()->setSelected (m_listWidget->anchorIndex(), true);
+            m_listWidget->playlistModel()->setSelected (m_listWidget->anchorIndex(), true);
         }
     }
 
@@ -141,18 +141,18 @@ void KeyboardManager::processDown()
 
     int keys = qobject_cast<QAction *>(sender())->shortcut()[0];
 
-    QList<int> rows = m_listWidget->model()->selectedIndexes();
+    QList<int> rows = m_listWidget->playlistModel()->selectedIndexes();
 
     if(rows.isEmpty())
     {
-        m_listWidget->model()->setSelected(m_listWidget->firstVisibleIndex(), true);
+        m_listWidget->playlistModel()->setSelected(m_listWidget->firstVisibleIndex(), true);
         m_listWidget->setAnchorIndex(m_listWidget->firstVisibleIndex());
         return;
     }
 
     if (!(keys & Qt::ShiftModifier || keys & Qt::AltModifier || keys & Qt::ControlModifier))
     {
-        m_listWidget->model()->clearSelection();
+        m_listWidget->playlistModel()->clearSelection();
         m_listWidget->setAnchorIndex(-1);
     }
 
@@ -168,41 +168,41 @@ void KeyboardManager::processDown()
 
     if (keys & Qt::AltModifier)
     {
-        if(rows.last() == m_listWidget->model()->count() - 1)
+        if(rows.last() == m_listWidget->playlistModel()->count() - 1)
             return;
-        m_listWidget->model()->moveItems (rows.last(), rows.last() + 1);
+        m_listWidget->playlistModel()->moveItems (rows.last(), rows.last() + 1);
         m_listWidget->setAnchorIndex (rows.last() + 1);
     }
     else if(keys & Qt::ControlModifier)
     {
         m_listWidget->setAnchorIndex (qMin(m_listWidget->anchorIndex() + 1,
-                                           m_listWidget->model()->count() - 1));
+                                           m_listWidget->playlistModel()->count() - 1));
     }
     else
     {
         if(s == SELECT_TOP)
         {
-            m_listWidget->model()->setSelected (first_visible, true);
+            m_listWidget->playlistModel()->setSelected (first_visible, true);
             m_listWidget->setAnchorIndex(first_visible);
         }
         else if(s == SELECT_BOTTOM)
         {
-            m_listWidget->model()->setSelected (last_visible, true);
+            m_listWidget->playlistModel()->setSelected (last_visible, true);
             m_listWidget->setAnchorIndex(last_visible);
         }
-        else if(rows.last() == m_listWidget->model()->count() - 1)
+        else if(rows.last() == m_listWidget->playlistModel()->count() - 1)
         {
-            m_listWidget->model()->setSelected (rows.last(), true);
+            m_listWidget->playlistModel()->setSelected (rows.last(), true);
             m_listWidget->setAnchorIndex(rows.last());
         }
         else if(rows.contains(m_listWidget->anchorIndex()) || m_listWidget->anchorIndex() < 0)
         {
-            m_listWidget->model()->setSelected (rows.last() + 1, true);
+            m_listWidget->playlistModel()->setSelected (rows.last() + 1, true);
             m_listWidget->setAnchorIndex(rows.last() + 1);
         }
         else if(m_listWidget->anchorIndex() >= 0)
         {
-            m_listWidget->model()->setSelected (m_listWidget->anchorIndex(), true);
+            m_listWidget->playlistModel()->setSelected (m_listWidget->anchorIndex(), true);
         }
     }
 
@@ -216,12 +216,12 @@ void KeyboardManager::processEnter()
 {
     if(!m_listWidget)
         return;
-    QList<int> rows = m_listWidget->model()->selectedIndexes();
+    QList<int> rows = m_listWidget->playlistModel()->selectedIndexes();
     if(rows.isEmpty())
         return;
     SoundCore::instance()->stop();
-    PlayListManager::instance()->activatePlayList(m_listWidget->model());
-    m_listWidget->model()->setCurrent (rows.first());
+    PlayListManager::instance()->activatePlayList(m_listWidget->playlistModel());
+    m_listWidget->playlistModel()->setCurrent (rows.first());
     MediaPlayer::instance()->play();
 }
 
@@ -234,12 +234,12 @@ void KeyboardManager::processPgUp()
     int offset = qMax(m_listWidget->firstVisibleIndex() - m_listWidget->visibleRows(), 0);
     m_listWidget->scroll (offset);
 
-    m_listWidget->model()->clearSelection();
+    m_listWidget->playlistModel()->clearSelection();
     if(m_listWidget->firstVisibleIndex() == first)
         m_listWidget->setAnchorIndex(0);
     else
         m_listWidget->setAnchorIndex(m_listWidget->firstVisibleIndex() + m_listWidget->visibleRows()/2);
-    m_listWidget->model()->setSelected(m_listWidget->anchorIndex(), true);
+    m_listWidget->playlistModel()->setSelected(m_listWidget->anchorIndex(), true);
 }
 
 void KeyboardManager::processPgDown()
@@ -249,15 +249,15 @@ void KeyboardManager::processPgDown()
 
     int first = m_listWidget->firstVisibleIndex();
     int offset = qMin(first + m_listWidget->visibleRows(),
-                      m_listWidget->model()->count() - 1);
+                      m_listWidget->playlistModel()->count() - 1);
     m_listWidget->scroll (offset);
 
-    m_listWidget->model()->clearSelection();
+    m_listWidget->playlistModel()->clearSelection();
     if(m_listWidget->firstVisibleIndex() == first)
-        m_listWidget->setAnchorIndex(m_listWidget->model()->count() - 1);
+        m_listWidget->setAnchorIndex(m_listWidget->playlistModel()->count() - 1);
     else
         m_listWidget->setAnchorIndex(m_listWidget->firstVisibleIndex() + m_listWidget->visibleRows()/2);
-    m_listWidget->model()->setSelected(m_listWidget->anchorIndex(), true);
+    m_listWidget->playlistModel()->setSelected(m_listWidget->anchorIndex(), true);
 }
 
 void KeyboardManager::processHome()
@@ -268,13 +268,13 @@ void KeyboardManager::processHome()
     m_listWidget->scroll (0);
     if(keys & Qt::ShiftModifier)
     {
-        m_listWidget->model()->setSelected (0, m_listWidget->anchorIndex(), true);
+        m_listWidget->playlistModel()->setSelected (0, m_listWidget->anchorIndex(), true);
     }
-    else if(m_listWidget->model()->count() != 0)
+    else if(m_listWidget->playlistModel()->count() != 0)
     {
-        m_listWidget->model()->clearSelection();
+        m_listWidget->playlistModel()->clearSelection();
         m_listWidget->setAnchorIndex(0);
-        m_listWidget->model()->setSelected(0, true);
+        m_listWidget->playlistModel()->setSelected(0, true);
     }
 }
 
@@ -284,19 +284,19 @@ void KeyboardManager::processEnd()
         return;
 
     int keys = qobject_cast<QAction *>(sender())->shortcut()[0];
-    int scroll_to = m_listWidget->model()->count() - m_listWidget->visibleRows();
+    int scroll_to = m_listWidget->playlistModel()->count() - m_listWidget->visibleRows();
     if(scroll_to >= 0)
         m_listWidget->scroll(scroll_to);
 
     if(keys & Qt::ShiftModifier)
     {
-        m_listWidget->model()->setSelected (m_listWidget->anchorIndex(), m_listWidget->model()->count() - 1, true);
+        m_listWidget->playlistModel()->setSelected (m_listWidget->anchorIndex(), m_listWidget->playlistModel()->count() - 1, true);
     }
-    else if(m_listWidget->model()->count() > 0)
+    else if(m_listWidget->playlistModel()->count() > 0)
     {
-        m_listWidget->model()->clearSelection();
-        m_listWidget->setAnchorIndex(m_listWidget->model()->count() - 1);
-        m_listWidget->model()->setSelected(m_listWidget->anchorIndex(), true);
+        m_listWidget->playlistModel()->clearSelection();
+        m_listWidget->setAnchorIndex(m_listWidget->playlistModel()->count() - 1);
+        m_listWidget->playlistModel()->setSelected(m_listWidget->anchorIndex(), true);
     }
 }
 

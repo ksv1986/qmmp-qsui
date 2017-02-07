@@ -126,13 +126,13 @@ QVariant AbstractPlaylistModel::data (const QModelIndex &index, int role) const
             {
             case Qmmp::Buffering:
             case Qmmp::Playing:
-                return QPixmap(":/images/play.png");
+                return QPixmap(":/qsui/media-playback-start.png");
             case Qmmp::Paused:
-                return QPixmap(":/images/pause.png");
+                return QPixmap(":/qsui/media-playback-pause.png");
             case Qmmp::Stopped:
             case Qmmp::NormalError:
             case Qmmp::FatalError:
-                return QPixmap(":/images/stop.png");
+                return QPixmap(":/qsui/media-playback-start.stop");
             }
         }
     }

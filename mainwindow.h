@@ -96,10 +96,11 @@ private:
     void createActions();
     void createButtons();
     void writeSettings();
+    bool showColumns() const;
     bool m_wasMaximized;
     BaseListWidget *listWidget() const;
     QString tabName(PlayListModel *model) const;
-    BaseListWidget *createListWidget(PlayListModel *model);
+    void createListWidget(PlayListModel *model);
     QString m_lastDir;
     PlayListManager *m_pl_manager;
     Ui::MainWindow m_ui;
@@ -116,6 +117,7 @@ private:
     QSlider *m_volumeSlider;
     QSUiAnalyzer *m_analyzer;
     MetaDataFormatter m_titleFormatter;
+    BaseListWidget *m_listWidget;
     int m_balance;
     int m_tab_menu_index;
     bool m_update;

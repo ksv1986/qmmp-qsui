@@ -10,6 +10,7 @@ TEMPLATE = lib
 
 SOURCES += \
     aboutqsuidialog.cpp \
+    abstractplaylistmodel.cpp \
     actionmanager.cpp \
     baselistwidget.cpp \
     colorwidget.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
     mainwindow.cpp \
     playlistbrowser.cpp \
     playlistheader.cpp \
+    playlistview.cpp \
     popupsettings.cpp \
     popupwidget.cpp \
     positionslider.cpp \
@@ -42,6 +44,7 @@ SOURCES += \
 
 HEADERS += \
     aboutqsuidialog.h \
+    abstractplaylistmodel.h \
     actionmanager.h \
     baselistwidget.h \
     colorwidget.h \
@@ -60,6 +63,7 @@ HEADERS += \
     mainwindow.h \
     playlistbrowser.h \
     playlistheader.h \
+    playlistview.h \
     popupsettings.h \
     popupwidget.h \
     positionslider.h \

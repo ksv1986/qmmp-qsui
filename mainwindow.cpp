@@ -43,6 +43,7 @@
 #include "qsuianalyzer.h"
 #include "visualmenu.h"
 #include "listwidget.h"
+#include "playlistview.h"
 #include "positionslider.h"
 #include "mainwindow.h"
 #include "qsuisettings.h"
@@ -82,11 +83,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(m_core, &SoundCore::bufferingProgress, this, &MainWindow::showBuffering);
     connect(m_core, &SoundCore::metaDataChanged, this, &MainWindow::showMetaData);
     //create tabs
-    auto list = createListWidget(m_pl_manager->selectedPlayList());
-    m_ui.centralwidget->layout()->addWidget(list);
-    Q_ASSERT(list == listWidget());
-    list->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    list->setMenu(m_pl_menu);
+    createListWidget(m_pl_manager->selectedPlayList());
     foreach(PlayListModel *model, m_pl_manager->playLists())
     {
         m_ui.tabWidget->addTab(tabName(model));
@@ -106,8 +103,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(m_pl_manager, &PlayListManager::selectedPlayListChanged, this, [this](PlayListModel *current, PlayListModel *previous)
     {
         auto list = listWidget();
-        Q_ASSERT(list->model() == previous);
-        list->setModel(current);
+        Q_ASSERT(list->playlistModel() == previous);
+        list->setPlaylistModel(current);
         m_ui.tabWidget->setCurrentIndex(m_pl_manager->selectedPlayListIndex());
     });
     connect(m_pl_manager, &PlayListManager::playListRemoved, this, &MainWindow::removeTab);
@@ -168,7 +165,7 @@ MainWindow::~MainWindow()
 
 BaseListWidget* MainWindow::listWidget() const
 {
-    return qobject_cast<BaseListWidget*>(m_ui.centralwidget->layout()->itemAt(1)->widget());
+    return m_listWidget;
 }
 
 QString MainWindow::tabName(PlayListModel *model) const
@@ -344,6 +341,7 @@ void MainWindow::showAndRaise()
 
 void MainWindow::showSettings()
 {
+    bool currentView = showColumns();
     ConfigDialog *confDialog = new ConfigDialog(this);
     QSUISettings *simpleSettings = new QSUISettings(this);
     confDialog->addPage(tr("Appearance"), simpleSettings, QIcon(":/qsui/qsui_settings.png"));
@@ -351,6 +349,12 @@ void MainWindow::showSettings()
     confDialog->exec();
     simpleSettings->writeSettings();
     confDialog->deleteLater();
+
+    if (showColumns() != currentView) {
+        delete m_listWidget;
+        createListWidget(m_pl_manager->selectedPlayList());
+    }
+
     readSettings();
     ActionManager::instance()->saveActions();
     m_analyzer->readSettings();
@@ -851,9 +855,24 @@ void MainWindow::writeSettings()
     settings.setValue("Simple/block_toolbars", ACTION(ActionManager::UI_BLOCK_TOOLBARS)->isChecked());
 }
 
-BaseListWidget *MainWindow::createListWidget(PlayListModel *model)
+bool MainWindow::showColumns() const
 {
-    return new ListWidget(model, this);
+    QSettings settings (Qmmp::configFile(), QSettings::IniFormat);
+    settings.beginGroup("Simple");
+
+    return settings.value("pl_view_columns", false).toBool();
+}
+
+void MainWindow::createListWidget(PlayListModel *model)
+{
+    if (showColumns())
+        m_listWidget = new PlaylistView(model, this);
+    else
+        m_listWidget = new ListWidget(model, this);
+
+    m_ui.centralwidget->layout()->addWidget(m_listWidget->widget());
+    m_listWidget->widget()->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+    m_listWidget->setMenu(m_pl_menu);
 }
 
 void MainWindow::savePlayList()

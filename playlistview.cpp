@@ -8,86 +8,86 @@
 #include <QEvent>
 #include <QHeaderView>
 #include <QMap>
+#include <QMenu>
 #include <QMimeData>
+#include <QSettings>
 #include <QUrl>
 
+#include <qmmp/soundcore.h>
 #include <qmmpui/uihelper.h>
 
-#include "playlistview.h"
 #include "abstractplaylistmodel.h"
-#include "settings.h"
+#include "playlistview.h"
 
-PlaylistView::PlaylistView(QWidget *parent)
+PlaylistView::PlaylistView(PlayListModel *_model, QWidget *parent)
         : QTreeView(parent)
+        , BaseListWidget(_model, parent)
 {
+    QTreeView::setModel(new AbstractPlaylistModel(_model, PlayListManager::instance(), SoundCore::instance(), this));
     header()->setSectionsMovable(true);
     header()->setSectionsClickable(true);
-    connect(header(), SIGNAL(sectionClicked(int)), this, SLOT(sectionClicked(int)));
+    connect(header(), &QHeaderView::sectionClicked, this, [this](int section)
+    {
+        if (!isSortingEnabled())
+        {
+            setSortingEnabled(true);
+            sortByColumn(section);
+        }
+    });
+    connect(this, &QTreeView::doubleClicked, this, [this](const QModelIndex &index) {
+        playAt(index.row());
+    });
+    setup();
 }
 
 PlaylistView::~PlaylistView()
 {
-    Settings::instance().setPlaylistState(header()->saveState());
+    QSettings settings(Qmmp::configFile(), QSettings::IniFormat);
+    settings.beginGroup("Simple");
+    settings.setValue("pl_header_state", header()->saveState());
+    settings.endGroup();
+}
+
+QWidget *PlaylistView::widget()
+{
+    return this;
+}
+
+void PlaylistView::readSettings()
+{
+
+    QSettings settings(Qmmp::configFile(), QSettings::IniFormat);
+    settings.beginGroup("Simple");
+    header()->restoreState(settings.value("pl_header_state", QByteArray("")).toByteArray());
+    settings.endGroup();
 }
 
 void PlaylistView::setup()
 {
-    header()->restoreState(Settings::instance().playlistState());
+    readSettings();
     header()->setContextMenuPolicy( Qt::ActionsContextMenu );
 
-    for ( int i = 0; i < model()->columnCount(); i++ )
+    for (int i = 0; i < model()->columnCount(); i++)
     {
-        QAction *action = new QAction( model()->headerData( i, Qt::Horizontal ).toString(), header() );
-        header()->addAction( action );
-        m_columnActions.append( action );
-        action->setCheckable( true );
-        if ( !isColumnHidden( i ) )
-            action->setChecked( true );
-        connect( action, SIGNAL( toggled(bool) ), this, SLOT(toggleColumn(bool) ) );
+        QAction *action = new QAction(model()->headerData(i, Qt::Horizontal).toString(), header());
+        header()->addAction(action);
+        action->setCheckable(true);
+        if (!isColumnHidden(i))
+            action->setChecked(true);
+        connect(action, &QAction::toggled, this, [this, i](bool toggled) {
+            if (toggled)
+                showColumn(i);
+            else
+                hideColumn(i);
+        });
     }
-
-    setContextMenuPolicy( Qt::ActionsContextMenu );
-
-    QAction *action = new QAction( tr("View Track Details"), header() );
-    action->setShortcut(tr("Ctrl+I"));
-    addAction( action );
-
-    QAction *openDir = new QAction( tr("Open Item Directory"), header() );
-    openDir->setShortcut(QKeySequence("Ctrl+D"));
-    addAction( openDir );
-
-    addActions(UiHelper::instance()->actions(UiHelper::PLAYLIST_MENU));
-
-    AbstractPlaylistModel *playlist = qobject_cast<AbstractPlaylistModel*>(model());
-    connect( action, SIGNAL(triggered()), playlist, SLOT(showDetails()));
-    connect(openDir, SIGNAL(triggered()), playlist, SLOT(openDirectory()));
-    connect(playlist, SIGNAL(currentChanged(QModelIndex)), this, SLOT(scrollToIndex(QModelIndex)));
-}
-
-void PlaylistView::scrollToIndex(const QModelIndex &index)
-{
-    scrollTo(index);
-}
-
-void PlaylistView::sectionClicked(int section)
-{
-    if (!isSortingEnabled())
-    {
-        setSortingEnabled(true);
-        sortByColumn(section);
-    }
-}
-
-void PlaylistView::toggleColumn(bool toggled)
-{
-    int index = m_columnActions.indexOf(qobject_cast< QAction* >(sender()));
-    if ( index != -1 )
-    {
-        if (toggled)
-            showColumn(index);
-        else
-            hideColumn(index);
-    }
+    setSelectionMode( ExtendedSelection );
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    setRootIsDecorated(false);
+    connect(this, &QTreeView::customContextMenuRequested, this, [this](const QPoint &point) {
+        if (m_menu)
+            m_menu->exec(viewport()->mapToGlobal(point));
+    });
 }
 
 void PlaylistView::dragEnterEvent(QDragEnterEvent* event)
@@ -219,20 +219,4 @@ void PlaylistView::startDrag(Qt::DropActions supportedActions)
         drag->setMimeData(mimeData);
         drag->exec(supportedActions, Qt::CopyAction);
     }
-}
-
-void PlaylistView::removeSelected()
-{
-    QList<int> rowList;
-    foreach(QModelIndex rowItem, selectedIndexes())
-    {
-        if (rowItem.column() == 0)
-        {
-            rowList.push_front(rowItem.row());
-        }
-    }
-
-    AbstractPlaylistModel *playlist = qobject_cast<AbstractPlaylistModel*>(model());
-    foreach(int row, rowList)
-        playlist->removeAt(row);
 }

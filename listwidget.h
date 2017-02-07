@@ -45,14 +45,16 @@ class PopupWidget;
 /**
    @author Ilya Kotov <forkotov02@hotmail.ru>
 */
-class ListWidget : public BaseListWidget
+
+/* QObject must go first in inheritance list or it would confuse moc */
+class ListWidget : public QWidget, public BaseListWidget
 {
     Q_OBJECT
+
 public:
-    ListWidget(PlayListModel *model, QWidget *parent = 0);
+    explicit ListWidget(PlayListModel *model, QWidget *parent = 0);
     ~ListWidget();
     QList<QAction*> actions() override;
-
 
 public:
     /*!
@@ -66,10 +68,11 @@ public:
 
     int anchorIndex() const;
     void setAnchorIndex(int index);
-    void setModel(PlayListModel *newModel) override;
+    void setPlaylistModel(PlayListModel *newModel) override;
+    void readSettings() override;
+    QWidget *widget() override;
 
 public slots:
-    void readSettings() override;
     void updateList(int flags);
     void scroll(int); //0-99
     void recenterCurrent();
@@ -79,21 +82,21 @@ signals:
     void positionChanged(int, int); //current position, maximum value
 
 protected:
-    void paintEvent(QPaintEvent *);
-    void mouseDoubleClickEvent(QMouseEvent *);
-    void mousePressEvent(QMouseEvent *);
-    void mouseMoveEvent(QMouseEvent *);
-    void mouseReleaseEvent(QMouseEvent *);
-    void resizeEvent(QResizeEvent *);
-    void wheelEvent(QWheelEvent *);
-    void showEvent(QShowEvent *);
+    void paintEvent(QPaintEvent *) override;
+    void mouseDoubleClickEvent(QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
+    void wheelEvent(QWheelEvent *) override;
+    void showEvent(QShowEvent *) override;
     int indexAt(int)const;
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dropEvent(QDropEvent *event);
-    void dragLeaveEvent(QDragLeaveEvent *);
-    void dragMoveEvent(QDragMoveEvent *event);
-    void contextMenuEvent (QContextMenuEvent * event);
-    bool event (QEvent *e);
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void contextMenuEvent (QContextMenuEvent * event) override;
+    bool event (QEvent *e) override;
 
 private slots:
     void updateSkin();

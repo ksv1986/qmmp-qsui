@@ -1,27 +1,29 @@
 #ifndef BASELISTWIDGET_H
 #define BASELISTWIDGET_H
 
-#include <QWidget>
+#include <QList>
 
 class KeyboardManager;
 class PlayListModel;
+class QAction;
 class QMenu;
+class QWidget;
 
-class BaseListWidget : public QWidget
+class BaseListWidget
 {
-    Q_OBJECT
 public:
-    BaseListWidget(PlayListModel *model, QWidget *parent = 0);
+    explicit BaseListWidget(PlayListModel *model, QWidget *parent = 0);
+    virtual ~BaseListWidget() {}
 
+    void playAt(int index);
     QMenu *menu() const;
     void setMenu(QMenu *menu);
-    PlayListModel *model() const;
-    virtual void setModel(PlayListModel *newModel);
+    PlayListModel *playlistModel() const;
+
+    virtual void setPlaylistModel(PlayListModel *newModel);
     virtual QList<QAction*> actions();
 
-signals:
-
-public slots:
+    virtual QWidget *widget() = 0;
     virtual void readSettings() = 0;
 
 protected:
